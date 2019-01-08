@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  app:
+    image: cardonaje/monstaftp:latest
+    volumes:
+      - "./license:/var/www/mftp/license"
+      - "./settings:/var/www/mftp/settings"
+      - "./languages:/var/www/mftp/application/languages"
+    networks:
+      - webgateway
+
+
+networks:
+  webgateway:
+    external: true
+
