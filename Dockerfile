@@ -26,7 +26,7 @@ EXPOSE 80
 
 
 
-COPY mftp /var/www/
+COPY mftp /var/www/mftp
 
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
