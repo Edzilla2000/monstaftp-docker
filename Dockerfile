@@ -5,11 +5,11 @@ LABEL description="Project to allow you to run MonstaFTP (https://www.monstaftp.
 
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-   apache2 php7.0  libapache2-mod-php7.0 \
+   apache2 php7.2  libapache2-mod-php7.2 \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/*
 
-RUN a2enmod php7.0
+RUN a2enmod php7.2
 RUN a2enmod rewrite
 
 # Update the PHP.ini file, enable <? ?> tags and quieten logging.
