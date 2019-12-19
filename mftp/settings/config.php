@@ -10,6 +10,7 @@
     $configTimeZone = "UTC";
     $configTempDir = "";
     $configMaxFileSize = "1024M";
+    $configChunkUploadSize = "default";
     $configMaxExecutionTimeSeconds = 1800;
     $configSSHAgentAuthEnabled = false;
     $configSSHKeyAuthEnabled = false;
@@ -17,6 +18,9 @@
 
     $configMaxLoginFailures = 3;
     $configLoginFailuresResetTimeMinutes = 5;
+
+    $configMftpActionLogPath = null;
+    $configMftpActionLogFunction = null;
 
     $configLogToSyslog = false;
     $configMftpSyslogFacility = LOG_USER;
@@ -35,6 +39,9 @@
     define("MFTP_PAGE_TITLE", $configPageTitle);
     define("MFTP_MAX_LOGIN_FAILURES", $configMaxLoginFailures);
     define("MFTP_LOGIN_FAILURES_RESET_TIME_MINUTES", $configLoginFailuresResetTimeMinutes);
+
+    define("MFTP_ACTION_LOG_PATH", $configMftpActionLogPath);
+    define("MFTP_ACTION_LOG_FUNCTION", $configMftpActionLogFunction);
 
     define("MFTP_LOG_TO_SYSLOG", $configLogToSyslog);
     define("MFTP_LOG_SYSLOG_FACILITY", $configMftpSyslogFacility);
@@ -58,6 +65,8 @@
     }
 
     define("MFTP_MAX_UPLOAD_SIZE", $maxUploadSizeBytes);
+
+    define("MFTP_CHUNK_UPLOAD_SIZE", $configChunkUploadSize);
 
     ini_set('max_execution_time', $configMaxExecutionTimeSeconds);
 

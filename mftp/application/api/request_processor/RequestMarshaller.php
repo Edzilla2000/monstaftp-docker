@@ -74,7 +74,7 @@
 
         public function testConfiguration($request) {
             $this->initRequestDispatcher($request);
-            return $this->requestDispatcher->testConnectAndAuthenticate($request['context']);
+            return $this->requestDispatcher->testConnectAndAuthenticate($request['context'], false);
         }
 
         public function disconnect() {
@@ -140,7 +140,6 @@
             $originalFileContents = array_key_exists("originalFileContents", $request['context']) ?
                 $request['context']['originalFileContents'] : null;
 
-
             if(array_key_exists("encoding", $request['context'])) {
                 $fileContentsEncoding = $request['context']['encoding'];
 
@@ -163,7 +162,7 @@
                 list($serverFileLocalPath, $transferContext) = self::buildTransferContext($request);
 
                 try {
-                    $this->requestDispatcher->downloadFile($transferContext);
+                    $this->requestDispatcher->downloadFile($transferContext, true);
                     $serverFileContents = fileGetContentsInUtf8($serverFileLocalPath);
                 } catch (Exception $e) {
                     @unlink($serverFileLocalPath);
@@ -190,7 +189,7 @@
 
             try {
                 file_put_contents($localPath, $decodedContents);
-                $this->requestDispatcher->uploadFile($transferContext);
+                $this->requestDispatcher->uploadFile($transferContext, false, true);
             } catch (Exception $e) {
                 @unlink($localPath);
                 throw $e;
@@ -198,6 +197,8 @@
 
             // this should be done in a finally to avoid repeated code but we need to support PHP < 5.5
             @unlink($localPath);
+
+            mftpActionLog("Edit file", $this->requestDispatcher->getConnection(), dirname($transferContext["remotePath"]), monstaBasename($transferContext["remotePath"]), "");
 
             return array(
                 'success' => true
@@ -212,7 +213,7 @@
             list($localPath, $transferContext) = self::buildTransferContext($request);
 
             try {
-                $this->requestDispatcher->downloadFile($transferContext);
+                $this->requestDispatcher->downloadFile($transferContext, true);
                 $fileContents = fileGetContentsInUtf8($localPath);
             } catch (Exception $e) {
                 @unlink($localPath);

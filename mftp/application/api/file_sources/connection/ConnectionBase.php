@@ -1,5 +1,6 @@
 <?php
     require_once(dirname(__FILE__) . "/../../lib/helpers.php");
+    require_once(dirname(__FILE__) . "/../../lib/logging.php");
     require_once(dirname(__FILE__) . '/../Validation.php');
     require_once(dirname(__FILE__) . '/../PathOperations.php');
     require_once(dirname(__FILE__) . '/RecursiveFileFinder.php');
@@ -184,7 +185,7 @@
         }
 
         protected function getLastError() {
-            if(!is_null($this->lastError)) {
+            if (!is_null($this->lastError)) {
                 $lastError = $this->lastError;
                 $this->lastError = null;
                 return $lastError;
@@ -463,10 +464,13 @@
                 $remotePath = $remotePathAndType[0];
                 $isDirectory = $remotePathAndType[1];
 
-                if ($isDirectory)
+                if ($isDirectory) {
                     $this->deleteDirectory($remotePath);
-                else
+                    mftpActionLog("Delete directory", $this, dirname($remotePath), monstaBasename($remotePath), "");
+                } else {
                     $this->deleteFile($remotePath);
+                    mftpActionLog("Delete file", $this, dirname($remotePath), monstaBasename($remotePath), "");
+                }
             }
         }
 
@@ -502,8 +506,26 @@
 
             Validation::validatePermissionMask($mode, false);
 
-            if (!$this->handleChangePermissions($mode, $remotePath))
-                $this->handleOperationError('CHANGE_PERMISSIONS_OPERATION', $remotePath, $this->getLastError());
+            if (!$this->handleChangePermissions($mode, $remotePath)) {
+                //$this->handleOperationError('CHANGE_PERMISSIONS_OPERATION', $remotePath, $this->getLastError());
+            }
+        }
+
+        /**
+         * @param $path
+         * @return bool
+         */
+        public function isDirectory($path) {
+            $this->ensureConnectedAndAuthenticated('IS_DIRECTORY');
+
+            try {
+                $this->listDirectory($path);
+                return true;
+            } catch (Exception $e) {
+                // failure should just means it's a file
+            }
+
+            return false;
         }
 
         /**
@@ -515,7 +537,6 @@
         public function copy($source, $destination) {
             $this->ensureConnectedAndAuthenticated('COPY_OPERATION');
 
-            $isDirectory = false;
 
             $newPermissions = array();
             /*
@@ -523,17 +544,15 @@
             store the dest permissions here
             */
 
-            try {
-                $this->listDirectory($source);
-                $isDirectory = true;
-            } catch (Exception $e) {
-                // failure just means it's a file
-            }
+            $isDirectory = $this->isDirectory($source);
 
             if (!$isDirectory) {
+                //mftpActionLog("Copy file", $this->connection, dirname($source), monstaBasename($source) . " to " . $destination, "");
+
                 $sources = array(array($source, null));
                 $destinations = array($destination);
             } else {
+                //mftpActionLog("Copy folder", $this->connection, dirname($source), monstaBasename($source) . " to " . $destination, "");
                 $fileFinder = new RecursiveFileFinder($this, $source);
                 $sources = $fileFinder->findFilesAndDirectoriesInPaths();
                 $destinations = array();
@@ -654,7 +673,7 @@
         }
 
         protected function getCapabilitiesArrayValue($capabilitiesKey) {
-            if(is_null($this->serverCapabilitiesArray)) {
+            if (is_null($this->serverCapabilitiesArray)) {
                 return null;
             }
 
@@ -663,17 +682,17 @@
         }
 
         private function populateServerCapabilitiesArray() {
-            $serverCapabilities = new ServerCapabilities(PathOperations::join(MONSTA_CONFIG_DIR_PATH , "server_capabilities.php"));
+            $serverCapabilities = new ServerCapabilities(PathOperations::join(MONSTA_CONFIG_DIR_PATH, "server_capabilities.php"));
 
             $capabilitiesArray = $serverCapabilities->getServerCapabilities($this->getProtocolName(),
                 $this->configuration->getHost(), $this->configuration->getPort());
 
-            if(is_null($capabilitiesArray)) {
+            if (is_null($capabilitiesArray)) {
                 $capabilitiesArray = $this->handleFetchServerCapabilities();
 
-                if(!is_null($capabilitiesArray)) {
+                if (!is_null($capabilitiesArray)) {
                     $serverCapabilities->setServerCapabilities($this->getProtocolName(),
-                    $this->configuration->getHost(), $this->configuration->getPort(), $capabilitiesArray);
+                        $this->configuration->getHost(), $this->configuration->getPort(), $capabilitiesArray);
                 }
             }
 

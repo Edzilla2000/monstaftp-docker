@@ -974,6 +974,8 @@ class Net_SFTP extends Net_SSH2
 
         $this->_update_stat_cache($dir, array());
 
+        $unameGnameRe = '/^.{10}\s+\d+\s+(\w+)\s+(\w+)/m';
+
         $contents = array();
         while (true) {
             // http://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-8.2.2
@@ -1008,6 +1010,12 @@ class Net_SFTP extends Net_SSH2
                                 $attributes['type'] = $fileType;
                             }
                         }
+
+                        if (preg_match($unameGnameRe, $longname, $unameGnameMatches)) {
+                            $attributes['uname'] = $unameGnameMatches[1];
+                            $attributes['gname'] = $unameGnameMatches[2];
+                        }
+
                         $contents[$shortname] = $attributes + array('filename' => $shortname);
 
                         if (isset($attributes['type']) && $attributes['type'] == NET_SFTP_TYPE_DIRECTORY && ($shortname != '.' && $shortname != '..')) {

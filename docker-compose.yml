@@ -9,6 +9,15 @@ services:
       - "./languages:/var/www/mftp/application/languages"
     networks:
       - webgateway
+    deploy:
+      labels:
+        - "traefik.backend=mftp"
+        - "traefik.frontend.rule=Host:mftp.3rco.be"
+        - "traefik.port=80"
+        - "traefik.enable=true"
+        - "traefik.docker.network=webgateway"
+        - "traefik.default.protocol=http"
+        - "traefik.frontend.headers.customResponseHeaders=Strict-Transport-Security:max-age=15552000"
 
 
 networks:

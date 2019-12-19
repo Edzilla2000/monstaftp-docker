@@ -1,16 +1,7 @@
 <?php
 
     require_once(dirname(__FILE__) . '/ConnectionBase.php');
-    require_once(dirname(__FILE__) . '/../connection/StatOutputListItem.php');
-
-    class MockStatOutputListItem extends StatOutputListItem {
-        public function __construct($name, $fileStat) {
-            parent::__construct($name, $fileStat);
-            if($name == 'src')
-                $this->link = true;
-        }
-
-    }
+    require_once(dirname(__FILE__) . '/MockStatOutputListItem.php');
 
     class MockConnection extends ConnectionBase {
         protected $protocolName = 'Mock';
@@ -137,20 +128,20 @@
 
         private $localFixturesList = array(
             array(
-            "name" => "perm-update",
-            "dev" => 16777220,
-            "ino" => 34731845,
-            "mode" => 0666,
-            "nlink" => 1,
-            "uid" => 501,
-            "gid" => 20,
-            "rdev" => 0,
-            "size" => 17,
-            "atime" => 1464002544,
-            "mtime" => 1458871912,
-            "ctime" => 1458871912,
-            "blksize" => 4096,
-            "blocks" => 8
+                "name" => "perm-update",
+                "dev" => 16777220,
+                "ino" => 34731845,
+                "mode" => 0666,
+                "nlink" => 1,
+                "uid" => 501,
+                "gid" => 20,
+                "rdev" => 0,
+                "size" => 17,
+                "atime" => 1464002544,
+                "mtime" => 1458871912,
+                "ctime" => 1458871912,
+                "blksize" => 4096,
+                "blocks" => 8
             )
         );
 
@@ -179,7 +170,7 @@
             $mockUsernameLength = strlen(MOCK_DEFAULT_USERNAME);
 
             return substr($this->configuration->getUsername(), 0, $mockUsernameLength) == MOCK_DEFAULT_USERNAME
-            && $this->configuration->getPassword() == MOCK_DEFAULT_PASSWORD;
+                && $this->configuration->getPassword() == MOCK_DEFAULT_PASSWORD;
         }
 
         protected function postAuthentication() {
@@ -187,12 +178,12 @@
         }
 
         protected function handleListDirectory($path, $showHidden) {
-            if($path == "/to-copy")
+            if ($path == "/to-copy")
                 throw new Exception("This is not a directory");
 
             $dirList = array();
 
-            if($path == '/local-fixtures/')
+            if ($path == '/local-fixtures/')
                 $dirSource = $this->localFixturesList;
             else
                 $dirSource = $this->linkedFixturesList;
@@ -223,20 +214,20 @@
         }
 
         protected function handleUploadFile($transferOperation) {
-            if($transferOperation->getRemotePath() == '/local-fixtures/no-perms') {
+            if ($transferOperation->getRemotePath() == '/local-fixtures/no-perms') {
                 $this->setPermissionDeniedError();
                 return false;
             }
 
             $fileContents = @file_get_contents($transferOperation->getLocalPath());
-            if($fileContents === FALSE)
+            if ($fileContents === FALSE)
                 return FALSE;
             $this->fixtures[$transferOperation->getRemotePath()] = $fileContents;
             return true;
         }
 
         protected function handleDeleteFile($remotePath) {
-            if($remotePath == '/local-fixtures/readonly/file') {
+            if ($remotePath == '/local-fixtures/readonly/file') {
                 $this->setPermissionDeniedError();
                 return false;
             }
@@ -254,7 +245,7 @@
                 return false;
             }
 
-            if ($remotePath == "/local-fixtures"){
+            if ($remotePath == "/local-fixtures") {
                 @trigger_error("File exists");
                 return false;
             }
@@ -263,12 +254,12 @@
         }
 
         protected function handleDeleteDirectory($remotePath) {
-            if($remotePath == '/idontexist') {
+            if ($remotePath == '/idontexist') {
                 $this->checkFileNotFound($remotePath);
                 return false;
             }
 
-            if($remotePath == '/local-fixtures/readonly/directory') {
+            if ($remotePath == '/local-fixtures/readonly/directory') {
                 $this->setPermissionDeniedError();
                 return false;
             }
@@ -278,7 +269,7 @@
 
         protected function handleRename($source, $destination) {
             $res = $this->handleCopy($source, $destination);
-            if($res === false)
+            if ($res === false)
                 return false;
             unset($this->fixtures[$source]);
             return true;
@@ -290,21 +281,21 @@
                 return false;
             }
 
-            if($remotePath == '/local-fixtures/perm-update')
+            if ($remotePath == '/local-fixtures/perm-update')
                 $this->localFixturesList[0]['mode'] = $mode;
-            else if(!$this->checkFileNotFound($remotePath))
+            else if (!$this->checkFileNotFound($remotePath))
                 return false;
 
             return true;
         }
 
         protected function handleCopy($source, $destination) {
-            if($source == '/local-fixtures/readonly/file') {
+            if ($source == '/local-fixtures/readonly/file') {
                 $this->setPermissionDeniedError();
                 return false;
             }
 
-            if(!$this->checkFileNotFound($source))
+            if (!$this->checkFileNotFound($source))
                 return false;
 
             $contents = $this->fixtures[$source];
@@ -314,9 +305,9 @@
 
         public function deleteDirectory($remotePath) {
             $this->ensureConnectedAndAuthenticated('DELETE_DIRECTORY_OPERATION');
-            if(!$this->handleDeleteDirectory($remotePath))
+            if (!$this->handleDeleteDirectory($remotePath))
                 $this->handleOperationError('DELETE_DIRECTORY_OPERATION', $remotePath, $this->getLastError());
-            
+
         }
 
         private function setPermissionDeniedError() {

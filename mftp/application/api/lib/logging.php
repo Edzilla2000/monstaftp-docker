@@ -40,7 +40,7 @@
     function _mftpLogToSyslog($priority, $message) {
         $facility = defined("MFTP_LOG_SYSLOG_FACILITY") ? MFTP_LOG_SYSLOG_FACILITY : LOG_USER;
 
-        if(!@openlog("MONSTAFTP", LOG_ODELAY, $facility))
+        if (!@openlog("MONSTAFTP", LOG_ODELAY, $facility))
             return;
 
         syslog($priority, $message);
@@ -50,8 +50,8 @@
 
     function _mftpShouldLogToFile() {
         return defined("MFTP_LOG_TO_FILE") && MFTP_LOG_TO_FILE
-        && defined("MFTP_LOG_FILE_PATH") && !is_null(MFTP_LOG_FILE_PATH)
-        && defined("MFTP_LOG_LEVEL_THRESHOLD");
+            && defined("MFTP_LOG_FILE_PATH") && !is_null(MFTP_LOG_FILE_PATH)
+            && defined("MFTP_LOG_LEVEL_THRESHOLD");
     }
 
     function _mftpShouldLogToSyslog() {
@@ -62,6 +62,39 @@
         if (_mftpShouldLogToFile() && $priority <= MFTP_LOG_LEVEL_THRESHOLD)
             _mftpLogToFile(MFTP_LOG_FILE_PATH, $priority, $message);
 
-        if(_mftpShouldLogToSyslog())
+        if (_mftpShouldLogToSyslog())
             _mftpLogToSyslog($priority, $message);
+    }
+
+    function defaultMftpActionLog($action, $clientIp, $host, $username, $folderPath, $fileName, $error) {
+        if (!defined("MFTP_ACTION_LOG_PATH")) {
+            return;
+        }
+
+        if (is_null(MFTP_ACTION_LOG_PATH)) {
+            return;
+        }
+
+        $handle = fopen(MFTP_ACTION_LOG_PATH, "a");
+        if ($handle === false)
+            return;
+
+        fprintf($handle, "%s|%s|%s|%s|%s|%s|%s|%s\n",
+            date("c"), $clientIp, $host, $username, $action, $folderPath, $fileName, $error);
+        fclose($handle);
+    }
+
+    function mftpActionLog($action, $connection, $folderPath, $fileName, $error) {
+        $clientIp = $_SERVER['REMOTE_ADDR'];
+
+        $configuration = $connection->getConfiguration();
+        $host = $configuration->getHost();
+        $username = $configuration->getRemoteUsername();
+
+        if (defined("MFTP_ACTION_LOG_FUNCTION") && !is_null(MFTP_ACTION_LOG_FUNCTION)) {
+            call_user_func(MFTP_ACTION_LOG_FUNCTION, $action, $clientIp, $host, $username, $folderPath,
+                $fileName, $error);
+        } else {
+            defaultMftpActionLog($action, $clientIp, $host, $username, $folderPath, $fileName, $error);
+        }
     }

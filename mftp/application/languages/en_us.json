@@ -55,6 +55,7 @@
   "CUT_ACTION": "Cut",
   "COPY_ACTION": "Copy",
   "COPY_NAME_ACTION": "Copy Name",
+  "CREATE_ZIP_ACTION": "Create Zip Archive",
   "PASTE_ACTION": "Paste",
   "CHMOD_ACTION": "CHMOD",
   "BACK_ACTION": "Back",
@@ -98,6 +99,7 @@
   "CREATING_ACTIVITY_STATUS": "Creating…",
   "RENAMING_ACTIVITY_STATUS": "Renaming…",
   "FETCHING_ACTIVITY_STATUS": "Fetching…",
+  "ZIPPING_ACTIVITY_STATUS": "Archiving…",
 
   "MASTER_PASSWORD_ENTER_PLACEHOLDER": "Enter your master password",
   "MASTER_PASSWORD_SET_PLACEHOLDER": "Choose a master password",
@@ -143,9 +145,11 @@
   "CONFIRM_UPLOAD_OVERWRITE_MESSAGE": "The file {file_name} already exists. Do you want to replace it with the uploaded file?",
   "UPLOAD_OVERWRITE_ACTION": "Upload and Replace",
   "UPLOAD_KEEP_ACTION": "Keep Remote File",
+  "APPLY_TO_ALL": "Do this for all files",
 
   "COMPLETED_OF_TOTAL_JOINER": "of",
   "UPLOAD_TRANSFERRING_TO_SERVER_MESSAGE": "Transferring to server",
+  "UPLOAD_PROCESSING_SERVER_MESSAGE": "Processing Files",
   "UPLOAD_ARCHIVE_TRANSFERRING_MESSAGE": "Extracting…",
   "UPLOAD_CANCEL_ITEM_CONFIRM_MESSAGE": "Are you sure you want to cancel uploading {item_name}?",
   "UPLOAD_FILES_TOO_LARGE_MESSAGE": "The following {item_count, plural, one{item exceeds} other{items exceed}} the maximum upload size allowed ({maximum_size}) by your server configuration: ",
@@ -166,6 +170,9 @@
   "FILE_NAME_CONTAINS_SLASH_MESSAGE": "The {item_type} name must not contain a /.",
   "FILE_NAME_EMPTY_MESSAGE": "The {item_type} name must not be empty.",
   "EXISTING_FILE_SUFFIX": "Copy",
+
+  "CREATE_ZIP_PROMPT_TITLE": "Create Zip Archive",
+  "CREATE_ZIP_FILE_NAME_PLACEHOLDER": "Enter archive name",
 
   "EDITOR_CLOSE_CONFIRM_MESSAGE": "File {file_name} has been edited but not saved, are you sure you want to close this tab?",
 
@@ -195,6 +202,7 @@
   "DELETE_DIRECTORY_OPERATION": "delete directory",
   "DELETE_MULTIPLE_OPERATION": "delete multiple",
   "RENAME_OPERATION": "rename",
+  "ZIP_OPERATION": "archive",
   "COPY_OPERATION": "copy",
   "LIST_DIRECTORY_OPERATION": "list directory",
   "DOWNLOAD_OPERATION": "download",

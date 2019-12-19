@@ -46,6 +46,28 @@
             return $zipPath;
         }
 
+        public function buildLocalZip($fileList, $zipPath) {
+            $zipPath = monstaTempnam(getMonstaSharedTransferDirectory(), "monsta-download-zip");
+
+            $this->zipFile = new ZipArchive();
+            $this->zipFile->open($zipPath, ZipArchive::CREATE);
+
+            try {
+                foreach ($fileList as $relativeFilePath) {
+                    $this->addFileToZip($relativeFilePath);
+                }
+                $this->zipFile->close();
+            } catch (Exception $e) {
+                $this->cleanupLocalPaths();
+                throw $e;
+            }
+
+            // this should be done in a finally to avoid repeated code but we need to support PHP < 5.5
+            $this->cleanupLocalPaths();
+
+            return $zipPath;
+        }
+
         private function addFileToZip($relativeFilePath) {
             $fileName = monstaBasename($relativeFilePath);
             $fileOutputPath = monstaTempnam(getMonstaSharedTransferDirectory(), $fileName);

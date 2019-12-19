@@ -2,6 +2,7 @@
     require_once(dirname(__FILE__) . '/../constants.php');
     includeMonstaConfig();
     require_once(dirname(__FILE__) . '/../lib/helpers.php');
+    require_once(dirname(__FILE__) . '/../lib/logging.php');
     require_once(dirname(__FILE__) . '/../file_sources/configuration/ConfigurationFactory.php');
     require_once(dirname(__FILE__) . '/../file_sources/connection/ConnectionFactory.php');
     require_once(dirname(__FILE__) . '/../file_sources/connection/RecursiveFileFinder.php');
@@ -73,6 +74,7 @@
                 'fetchRemoteFile',
                 'uploadFileToNewDirectory',
                 'downloadMultipleFiles',
+                'createZip',
                 'setApplicationSettings',
                 'deleteMultiple',
                 'extractArchive',
@@ -98,7 +100,11 @@
             throw new InvalidArgumentException("Unknown action $actionName");
         }
 
-        private function connectAndAuthenticate() {
+        public function getConnection() {
+            return $this->connection;
+        }
+
+        private function connectAndAuthenticate($isTest = false) {
             $sessionNeedsStarting = false;
 
             if (function_exists("session_status")) {
@@ -126,17 +132,25 @@
                 $_SESSION["MFTP_LOGIN_FAILURES"]);
 
             if ($banManager->hostAndUserBanned($configuration->getHost(), $configuration->getRemoteUsername())) {
+                mftpActionLog("Log in", $this->connection, "", "", "Login and user has exceed maximum failures.");
                 throw new FileSourceAuthenticationException("Login and user has exceed maximum failures.",
                     LocalizableExceptionDefinition::$LOGIN_FAILURE_EXCEEDED_ERROR, array(
                         "banTimeMinutes" => MFTP_LOGIN_FAILURES_RESET_TIME_MINUTES
                     ));
             }
 
-            $this->connection->connect();
+            try {
+                $this->connection->connect();
+            } catch (Exception $e) {
+                mftpActionLog("Log in", $this->connection, "", "", $e->getMessage());
+                throw $e;
+            }
 
             try {
                 $this->connection->authenticate();
             } catch (Exception $e) {
+                mftpActionLog("Log in", $this->connection, "", "", $e->getMessage());
+
                 $banManager->recordHostAndUserLoginFailure($configuration->getHost(),
                     $configuration->getRemoteUsername());
 
@@ -148,6 +162,11 @@
             $banManager->resetHostUserLoginFailure($configuration->getHost(), $configuration->getRemoteUsername());
 
             $_SESSION["MFTP_LOGIN_FAILURES"] = $banManager->getStore();
+
+            if ($isTest) {
+                // only log success if it is the first connect from the user
+                mftpActionLog("Log in", $this->connection, "", "", "");
+            }
 
             if ($configuration->getInitialDirectory() === "" || is_null($configuration->getInitialDirectory())) {
                 return $this->connection->getCurrentDirectory();
@@ -168,10 +187,14 @@
             return $directoryList;
         }
 
-        public function downloadFile($context) {
+        public function downloadFile($context, $skipLog = false) {
             $this->connectAndAuthenticate();
             $transferOp = TransferOperationFactory::getTransferOperation($this->connectionType, $context);
             $this->connection->downloadFile($transferOp);
+            if (!$skipLog) {
+                // e.g. if editing a file don't log that it was also downloaded
+                mftpActionLog("Download file", $this->connection, dirname($transferOp->getRemotePath()), monstaBasename($transferOp->getRemotePath()), "");
+            }
             $this->disconnect();
         }
 
@@ -180,6 +203,11 @@
             $fileFinder = new RecursiveFileFinder($this->connection, $context['baseDirectory']);
             $foundFiles = $fileFinder->findFilesInPaths($context['items']);
 
+            foreach ($foundFiles as $foundFile) {
+                $fullPath = PathOperations::join($context['baseDirectory'], $foundFile);
+                mftpActionLog("Download file", $this->connection, dirname($fullPath), monstaBasename($fullPath), "");
+            }
+
             $zipBuilder = new ZipBuilder($this->connection, $context['baseDirectory']);
             $zipPath = $zipBuilder->buildZip($foundFiles);
 
@@ -187,10 +215,34 @@
             return $zipPath;
         }
 
-        public function uploadFile($context, $preserveRemotePermissions = false) {
+        public function createZip($context) {
+            $this->connectAndAuthenticate();
+            $fileFinder = new RecursiveFileFinder($this->connection, $context['baseDirectory']);
+            $foundFiles = $fileFinder->findFilesInPaths($context['items']);
+
+            foreach ($foundFiles as $foundFile) {
+                $fullPath = PathOperations::join($context['baseDirectory'], $foundFile);
+                mftpActionLog("Download file", $this->connection, dirname($fullPath), monstaBasename($fullPath), "");
+            }
+
+            $zipBuilder = new ZipBuilder($this->connection, $context['baseDirectory']);
+            $destPath = PathOperations::join($context['baseDirectory'], $context['dest']);
+            $zipPath = $zipBuilder->buildLocalZip($foundFiles, $destPath);
+
+            $this->connection->uploadFile(new FTPTransferOperation($zipPath, $destPath, FTP_BINARY));
+
+            $this->disconnect();
+            return $zipPath;
+        }
+
+        public function uploadFile($context, $preserveRemotePermissions = false, $skipLog = false) {
             $this->connectAndAuthenticate();
             $transferOp = TransferOperationFactory::getTransferOperation($this->connectionType, $context);
             $this->connection->uploadFile($transferOp, $preserveRemotePermissions);
+            if (!$skipLog) {
+                // e.g. if editing a file don't log that it was also uploaded
+                mftpActionLog("Upload file", $this->connection, dirname($transferOp->getRemotePath()), monstaBasename($transferOp->getRemotePath()), "");
+            }
             $this->disconnect();
         }
 
@@ -199,12 +251,14 @@
             $this->connectAndAuthenticate();
             $transferOp = TransferOperationFactory::getTransferOperation($this->connectionType, $context);
             $this->connection->uploadFileToNewDirectory($transferOp);
+            mftpActionLog("Upload file", $this->connection, dirname($transferOp->getRemotePath()), monstaBasename($transferOp->getRemotePath()), "");
             $this->disconnect();
         }
 
         public function deleteFile($context) {
             $this->connectAndAuthenticate();
             $this->connection->deleteFile($context['remotePath']);
+            mftpActionLog("Delete file", $this->connection, dirname($context['remotePath']), monstaBasename($context['remotePath']), "");
             $this->disconnect();
         }
 
@@ -222,13 +276,41 @@
 
         public function rename($context) {
             $this->connectAndAuthenticate();
+
+            if(array_key_exists('action', $context) && $context['action'] == 'move') {
+                $action = 'Move';
+            } else {
+                $action = 'Rename';
+            }
+
+            $itemType = $this->connection->isDirectory($context['source']) ? 'folder' : 'file';
+
             $this->connection->rename($context['source'], $context['destination']);
+
+            if ($action == 'Move') {
+                mftpActionLog($action . " " . $itemType, $this->connection, dirname($context['source']),
+                monstaBasename($context['source']) . " to " . $context['destination'],
+                "");
+            }
+            if ($action == 'Rename') {
+                mftpActionLog($action . " " . $itemType, $this->connection, dirname($context['source']),
+                monstaBasename($context['source']) . " to " . monstaBasename($context['destination']),
+                "");
+            }
+
             $this->disconnect();
         }
 
         public function changePermissions($context) {
             $this->connectAndAuthenticate();
+
+            $itemType = $this->connection->isDirectory($context['remotePath']) ? 'folder' : 'file';
+
             $this->connection->changePermissions($context['mode'], $context['remotePath']);
+
+            mftpActionLog("CHMOD " . $itemType, $this->connection, dirname($context['remotePath']),
+                monstaBasename($context['remotePath']) . " to " . decoct($context['mode']), "");
+
             $this->disconnect();
         }
 
@@ -238,8 +320,8 @@
             $this->disconnect();
         }
 
-        public function testConnectAndAuthenticate($context) {
-            $initialDirectory = $this->connectAndAuthenticate();
+        public function testConnectAndAuthenticate($context, $isInitalLogin = true) {
+            $initialDirectory = $this->connectAndAuthenticate($isInitalLogin);
             $serverCapabilities = array("initialDirectory" => $initialDirectory);
 
             if (isset($context['getServerCapabilities']) && $context['getServerCapabilities']) {
@@ -278,7 +360,7 @@
             $licenseReader = new LicenseReader($keyPairSuite);
             $license = $licenseReader->readLicense(MONSTA_LICENSE_PATH);
 
-            if(is_null($license))
+            if (is_null($license))
                 return $license;
 
             $publicLicenseKeys = array("expiryDate", "version", "isTrial", "licenseVersion", "productEdition");
@@ -336,10 +418,15 @@
                     'localPath' => $fetcher->getTempSavePath(),
                     'remotePath' => $fetchRequest->getUploadPath($effectiveUrl)
                 );
+                mftpActionLog("Fetch file", $this->connection, dirname($transferContext['remotePath']), $context['source'], "");
+                // mftpActionLog("Fetch file", $this->connection, dirname($context['destination']), $context['source'], "");
+
                 $transferOp = TransferOperationFactory::getTransferOperation($this->connectionType, $transferContext);
                 $this->connection->uploadFile($transferOp);
             } catch (Exception $e) {
                 $fetcher->cleanUp();
+                mftpActionLog("Fetch file", $this->connection, dirname($transferContext['remotePath']), $context['source'], $e->getMessage());
+                //mftpActionLog("Fetch file", $this->connection, dirname($context['destination']), $context['source'], $e->getMessage());
                 throw $e;
             }
 

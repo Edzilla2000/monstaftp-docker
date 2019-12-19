@@ -84,6 +84,14 @@
         return $splitPath[count($splitPath) - 1];
     }
 
+    function monstaReplaceExtension($filename, $new_extension) {
+        $info = pathinfo($filename);
+        return ($info['dirname'] ? $info['dirname'] . DIRECTORY_SEPARATOR : '') 
+            . $info['filename'] 
+            . '.' 
+            . $new_extension;
+    }
+
     function getMonstaSharedTransferDirectory() {
         // Directory that any transfers in the system go into so it can be cleared out regularly
         $uploadDirPath = PathOperations::join(monstaGetTempDirectory(), "mftp-transfers");
@@ -199,9 +207,9 @@
         recursiveUnlink($transferDir);
     }
 
-    function readUpload($uploadPath) {
+    function readUpload($uploadPath, $mode="w+") {
         $inputHandler = fopen('php://input', "r");
-        $fileHandler = fopen($uploadPath, "w+");
+        $fileHandler = fopen($uploadPath, $mode);
 
         while (FALSE !== ($buffer = fgets($inputHandler, 65536)))
             fwrite($fileHandler, $buffer);

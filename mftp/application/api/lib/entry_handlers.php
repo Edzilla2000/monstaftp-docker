@@ -27,16 +27,12 @@
     function extractSettingVars($postData, $rawKeys, $intKeys, $boolKeys) {
         $loginVars = array();
         for ($varType = 0; $varType <= 2; ++$varType) {
-            switch ($varType) {
-                case 0:
-                    $sourceKeys = $rawKeys;
-                    break;
-                case 1:
-                    $sourceKeys = $intKeys;
-                    break;
-                case 2:
-                default:
-                    $sourceKeys = $boolKeys;
+            if($varType == 0) {
+                $sourceKeys = $rawKeys;
+            } else if($varType == 1) {
+                $sourceKeys = $intKeys;
+            } else {
+                $sourceKeys = $boolKeys;
             }
 
             if (is_null($sourceKeys))
@@ -50,22 +46,15 @@
 
                     $var = $postData[$postKey];
 
-                    switch ($varType) {
-                        case 0:
-                            break;
-                        case 1:
-                            $var = intval($var);
+                    if ($varType == 1) {
+                        $var = intval($var);
 
-                            if ($var == 0)
-                                continue;
-                            /*  0 is returned for invalid numbers, or "0", and since it's only used for port at the
-                                moment it's invalid if 0 anyway, so skip */
-                            break;
-                        case 2:
-                        default:
-                            $var = convertStringToBoolean($var);
-                            if (is_null($var))
-                                continue;
+                        if ($var == 0)
+                            continue;
+                    } else if($var == 2) {
+                        $var = convertStringToBoolean($var);
+                        if (is_null($var))
+                            continue;
                     }
 
                     $loginVars[$varName] = $var;

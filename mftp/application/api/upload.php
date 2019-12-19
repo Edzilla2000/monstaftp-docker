@@ -25,7 +25,7 @@
 
         $request = json_decode($jsonEncodedRequest, true);
 
-        $marshaller->testConfiguration($request);
+        $marshaller->testConfiguration($request, false);
 
         $uploadPath = getTempTransferPath($request['context']['remotePath']);
 

@@ -25,7 +25,7 @@
 
 <html
 <head>
-    <title>Monsta FTP Diagnostics Tool</title>
+    <title>PBL</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="shortcut icon" type="image/x-icon" href="application/frontend/images/monsta-logo-favicon.png">
     <link rel="apple-touch-icon" href="application/frontend/images/monsta-logo-webclip.png">
@@ -183,9 +183,9 @@
                 <td>
                     <?php if (function_exists("openssl_get_publickey")) { ?>
                         <span class="green">Yes</span>
-                    <? } else {?>
+                    <?php } else {?>
                         <span class="no">No</span>
-                    <? } ?>
+                    <?php } ?>
                 </td>
             </tr>
             <tr>
@@ -194,9 +194,9 @@
                 <td>
                     <?php if (extension_loaded('zip')) { ?>
                         <span class="green">Yes</span>
-                    <? } else {?>
+                    <?php } else {?>
                         <span class="no">No</span>
-                    <? } ?>
+                    <?php } ?>
                 </td>
             </tr>
             <tr>
@@ -205,9 +205,9 @@
                 <td>
                     <?php if (ini_get('safe_mode')) { ?>
                         On
-                    <? } else {?>
+                    <?php } else {?>
                         Off
-                    <? } ?>
+                    <?php } ?>
                 </td>
             </tr>
             <tr>
@@ -216,23 +216,23 @@
                 <td>
                     <?php if (extension_loaded('suhosin')) { ?>
                         Yes
-                    <? } else {?>
+                    <?php } else {?>
                         No
-                    <? } ?>
+                    <?php } ?>
                 </td>
             </tr>
             <tr>
                 <td>Memory Limit:</td>
                 <td></td>
                 <td>
-                    <? echo ini_get('memory_limit')?>
+                    <?php echo ini_get('memory_limit')?>
                 </td>
             </tr>
             <tr>
                 <td>PHP Max Execution Time:</td>
                 <td></td>
                 <td>
-                    <? echo ini_get('max_execution_time'); ?> seconds
+                    <?php echo ini_get('max_execution_time'); ?> seconds
                 </td>
             </tr>
         </table>

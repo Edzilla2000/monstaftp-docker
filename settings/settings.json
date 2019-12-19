@@ -1,0 +1,23 @@
+{
+    "language": "fr_fr",
+    "showDotFiles": false,
+    "editableFileExtensions": "txt,htm,html,php,asp,aspx,js,css,xhtml,cfm,pl,py,c,cpp,rb,java,xml,json",
+    "footerItemDisplay": {
+        "version": false,
+        "new-version-alert": false
+    },
+    "loginItemDisplay": {
+        "login-link": false
+    },
+    "disableMasterLogin": true,
+    "helpUrl": "https://servicedesk.limelogic.be",
+    "connectionRestrictions": {
+        "types": ["sftp"],
+        "sftp": {
+            "host": "proftpd_proftpd",
+            "port": 23,
+            "initialDirectory": "/",
+            "authenticationModeName": "Password"
+        }
+    }
+}

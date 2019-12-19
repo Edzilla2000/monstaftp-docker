@@ -15,8 +15,19 @@
             $this->groupPermissions = new IntegerPermissionSet(($permissionBits >> 3) & 0x7);
             $this->otherPermissions = new IntegerPermissionSet($permissionBits & 0x7);
             $this->linkCount = null;
-            $this->ownerUserName = isset($itemStat['uid']) ? $itemStat['uid'] : null;
-            $this->ownerGroupName = isset($itemStat['gid']) ? $itemStat['gid'] : null;
+
+            if (isset($itemStat['uname'])) {
+                $this->ownerUserName = $itemStat['uname'];
+            } else {
+                $this->ownerUserName = isset($itemStat['uid']) ? $itemStat['uid'] : null;
+            }
+
+            if (isset($itemStat['gname'])) {
+                $this->ownerGroupName = $itemStat['gname'];
+            } else {
+                $this->ownerGroupName = isset($itemStat['gid']) ? $itemStat['gid'] : null;
+            }
+
             $this->size = isset($itemStat['size']) ? $itemStat['size'] : 0;
             $this->modificationDate = $itemStat['mtime'];
         }

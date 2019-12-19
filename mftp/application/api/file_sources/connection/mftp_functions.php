@@ -13,7 +13,7 @@
     define("MFTP_SSL_RETRY_COUNT", 100); // total time to wait = MFTP_SSL_RETRY_COUNT * MFTP_SSL_SLEEP_DELAY_USEC
 
 
-    if(!function_exists("monstaBasename")) {
+    if (!function_exists("monstaBasename")) {
         function monstaBasename($path) {
             // manual basename splitting because built in function may not work with special characters
             $splitPath = explode("/", $path);
@@ -258,6 +258,11 @@
          */
         public function __construct($responseCode, $responseText) {
             $this->code = $responseCode;
+
+            if (strlen($responseText) != 0 && substr($responseText, strlen($responseText) - 1) == "\r") {
+                $responseText = substr($responseText, 0, strlen($responseText) - 1);
+            }
+
             $this->text = $responseText;
         }
     }
@@ -356,6 +361,7 @@
      * @param mftp_conn $connection
      * @param string $username
      * @param string $password
+     * @throws MFTPAuthenticationRequiresTlsException
      * @throws MFTPAuthenticationPasswordException
      * @throws MFTPAuthenticationUsernameException
      * Login to FTP server after connecting (and optionally after enabling SSL)
@@ -538,10 +544,10 @@
 
         $resultLinesCount = count($storResultLines);
 
-        if($resultLinesCount != 0) {
+        if ($resultLinesCount != 0) {
             $resp = _mftp_parse_response($storResultLines[$resultLinesCount - 1]);
 
-            if($resp->code == 552)
+            if ($resp->code == 552)
                 throw new MFTPQuotaExceededException("STOR command failed due to quota exceeded", $resp->code,
                     $resp->text);
 
@@ -956,7 +962,7 @@
     function _mftp_epsv_setup($connection) {
         $resp = _mftp_perform_command($connection, "EPSV");
 
-        if($resp->code == 500) {
+        if ($resp->code == 500) {
             // some FTP servers claim to support EPSV but don't really. fall back to PASV in this case.
             $connection->disableExtendedPassive = true;
             return _mftp_pasv_setup($connection);

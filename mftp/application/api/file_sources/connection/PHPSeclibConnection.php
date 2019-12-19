@@ -104,7 +104,7 @@
         }
 
         protected function handleDeleteDirectory($remotePath) {
-            $deleteSuccess = $this->connection->delete($remotePath, true);
+            $deleteSuccess = $this->connection->rmdir($remotePath);
 
             if ($deleteSuccess)
                 mftpLog(LOG_DEBUG, "SFTPSecLib deleted directory '$remotePath'");
@@ -147,7 +147,6 @@
         }
 
         protected function authenticateByPassword() {
-            // TODO: Implement authenticateByPassword() method.
             $authSuccess = $this->connection->login($this->configuration->getRemoteUsername(),
                 $this->configuration->getPassword());
 

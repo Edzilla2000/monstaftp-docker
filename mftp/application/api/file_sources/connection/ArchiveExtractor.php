@@ -6,7 +6,6 @@
     require_once(dirname(__FILE__) . "/../../lib/helpers.php");
     require_once(dirname(__FILE__) . "/ConnectionFactory.php");
     require_once(dirname(__FILE__) . "/../../vendor/autoload.php");
-    require_once(dirname(__FILE__) . "/ArchiveExtractor.php");
 
     use \wapmorgan\UnifiedArchive\UnifiedArchive;
 
