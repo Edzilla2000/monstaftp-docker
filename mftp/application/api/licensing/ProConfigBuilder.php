@@ -23,7 +23,6 @@
 
         public function renderProConfig($configTemplatePath) {
             $rawContents = file_get_contents($configTemplatePath);
-
             $profileLocalPath = $this->generateRelativeProfilePath($this->getProPackagedID());
             $licenseLocalPath = $this->generateRelativeLicensePath($this->getProPackagedID());
 

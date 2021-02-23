@@ -83,6 +83,7 @@
         }
 
         public function marshallRequest($request, $skipConfiguration = false, $skipEncode = false) {
+
             $this->initRequestDispatcher($request, $skipConfiguration);
 
             $response = array();

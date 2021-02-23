@@ -28,8 +28,9 @@
                 $itemPath = PathOperations::join($installDirectory, $rootItem);
 
                 if (@file_exists($itemPath)) {
-                    throw new LocalizableException("Could not install to $itemPath as the item exists",
-                        LocalizableExceptionDefinition::$INSTALL_DIRECTORY_EXISTS_ERROR, array("path" => $itemPath));
+                    $errorPath = basename(dirname($itemPath)) . "/" . basename($itemPath);
+                    throw new LocalizableException("Could not install to $errorPath as the item exists",
+                        LocalizableExceptionDefinition::$INSTALL_DIRECTORY_EXISTS_ERROR, array("path" => $errorPath));
                 }
             }
         }
@@ -46,8 +47,9 @@
 
         public function validateInstallDirectory($installDirectory) {
             if (@!is_writable($installDirectory)) {
-                throw new LocalizableException("Could not install into $installDirectory as the directory is not writable",
-                    LocalizableExceptionDefinition::$INSTALL_PATH_NOT_WRITABLE_ERROR, array("path" => $installDirectory));
+                $errorPath = basename(dirname($installDirectory)) . "/" . basename($installDirectory);
+                throw new LocalizableException("Could not install into $errorPath as the directory is not writable",
+                    LocalizableExceptionDefinition::$INSTALL_PATH_NOT_WRITABLE_ERROR, array("path" => $errorPath));
             }
         }
 

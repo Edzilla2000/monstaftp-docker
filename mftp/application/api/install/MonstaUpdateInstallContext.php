@@ -71,17 +71,18 @@
         }
 
         public function validateInstallDirectory($installDirectory) {
+            $errorPath = basename(dirname($installDirectory)) . "/" . basename($installDirectory);
             if (@!file_exists($installDirectory))
-                throw new LocalizableException("Could not update in $installDirectory as the directory does not exist",
-                    LocalizableExceptionDefinition::$INSTALL_DIRECTORY_DOES_NOT_EXIST_ERROR, array("path" => $installDirectory));
+                throw new LocalizableException("Could not update in $errorPath as the directory does not exist",
+                    LocalizableExceptionDefinition::$INSTALL_DIRECTORY_DOES_NOT_EXIST_ERROR, array("path" => $errorPath));
 
             foreach (self::$monstaTestItems as $item) {
                 $this->validateMonstaItemExists($installDirectory, $item);
             }
 
             if (@!is_writable($installDirectory)) {
-                throw new LocalizableException("Could not update $installDirectory as the directory is not writable",
-                    LocalizableExceptionDefinition::$INSTALL_PATH_NOT_WRITABLE_ERROR, array("path" => $installDirectory));
+                throw new LocalizableException("Could not update $errorPath as the directory is not writable",
+                    LocalizableExceptionDefinition::$INSTALL_PATH_NOT_WRITABLE_ERROR, array("path" => $errorPath));
             }
         }
 

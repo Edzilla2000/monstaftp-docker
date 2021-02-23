@@ -95,17 +95,36 @@
         if (array_key_exists('MFTP_POST_LOGOUT_URL', $postData) || array_key_exists('MFTP_LOGIN_FAILURE_REDIRECT', $postData)) {
             $postedVars["settings"] = array();
 
-            if (array_key_exists('MFTP_POST_LOGOUT_URL', $postData))
-                $postedVars["settings"]['postLogoutUrl'] = $postData['MFTP_POST_LOGOUT_URL'];
+            if (array_key_exists('MFTP_POST_LOGOUT_URL', $postData)) {
+                //$postedVars["settings"]['postLogoutUrl'] = $postData['MFTP_POST_LOGOUT_URL'];
+                $postedVars["settings"]['postLogoutUrl'] = filter_var($postData['MFTP_POST_LOGOUT_URL'], FILTER_SANITIZE_URL);
+                if (!filter_var($postedVars["settings"]['postLogoutUrl'], FILTER_VALIDATE_URL)) {
+                    throw new Exception("Invalid logout url");
+                }
+                $protocol = strtolower(parse_url($postedVars["settings"]['postLogoutUrl'], PHP_URL_SCHEME));
+                if ($protocol != 'http' && $protocol != 'https') {
+                    throw new Exception("Invalid logout url");
+                }
+            }
 
-            if (array_key_exists('MFTP_LOGIN_FAILURE_REDIRECT', $postData))
-                $postedVars["settings"]['loginFailureRedirect'] = $postData['MFTP_LOGIN_FAILURE_REDIRECT'];
+            if (array_key_exists('MFTP_LOGIN_FAILURE_REDIRECT', $postData)) {
+                //$postedVars["settings"]['loginFailureRedirect'] = $postData['MFTP_LOGIN_FAILURE_REDIRECT'];
+                $postedVars["settings"]['loginFailureRedirect'] = filter_var($postData['MFTP_LOGIN_FAILURE_REDIRECT'], FILTER_SANITIZE_URL);
+                if (!filter_var($postedVars["settings"]['loginFailureRedirect'], FILTER_VALIDATE_URL)) {
+                    throw new Exception("Invalid failure redirect url");
+                }
+                $protocol = strtolower(parse_url($postedVars["settings"]['loginFailureRedirect'], PHP_URL_SCHEME));
+                if ($protocol != 'http' && $protocol != 'https') {
+                    throw new Exception("Invalid failure redirect url");
+                }
+            }
         }
 
         if (!array_key_exists('MFTP_CONNECTION_TYPE', $postData))
             return $postedVars;
 
-        $connectionType = $postData["MFTP_CONNECTION_TYPE"];
+        //$connectionType = $postData["MFTP_CONNECTION_TYPE"];
+        $connectionType = filter_var($postData["MFTP_CONNECTION_TYPE"], FILTER_SANITIZE_STRING);
 
         $postedVars["type"] = $connectionType;
 

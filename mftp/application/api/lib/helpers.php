@@ -29,8 +29,20 @@
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
-        for ($i = 0; $i < $length; $i++)
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        for ($i = 0; $i < $length; $i++) {
+            try {
+                $randomVal = random_int(0, $charactersLength - 1);
+            } catch (TypeError $e) {
+                $randomVal = rand(0, $charactersLength - 1);
+            } catch (Error $e) {
+                // This is required, if you do not need to do anything just rethrow.
+                throw $e;
+            } catch (Exception $e) {
+                $randomVal = rand(0, $charactersLength - 1);
+            }
+
+            $randomString .= $characters[$randomVal];
+        }
 
         return $randomString;
     }

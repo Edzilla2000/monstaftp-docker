@@ -8,4 +8,5 @@ $baseDir = dirname(dirname(dirname($vendorDir)));
 return array(
     'fd419dbaef6da3b0a9513930c6ff3624' => $vendorDir . '/wapmorgan/unified-archive/src/function.gzip_stat.php',
     '9e1b3d8b1d64afff01a1869b5f98e4e3' => $vendorDir . '/wapmorgan/unified-archive/src/REGISTER_LZW_STREAM_WRAPPER.php',
+    '5255c38a0faeba867671b61dfda6d864' => $vendorDir . '/paragonie/random_compat/lib/random.php',
 );

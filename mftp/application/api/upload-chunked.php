@@ -19,6 +19,8 @@
     $mftpUploadAction = $_GET['action'];
     $mftpUploadId = $_GET['uploadId'];
 
+    set_time_limit(300);
+
     function mftpGenerateChunkedSessionKey($uploadId) {
         return 'UPLOAD_KEY_' . $uploadId;
     }
@@ -48,7 +50,6 @@
         readUpload($tempFilePath, "a");
     }
 
-
     function mftpChunkedUploadFinish($marshaller, $uploadId, $request) {
         $sessionKey = mftpGenerateChunkedSessionKey($uploadId);
 
@@ -56,11 +57,10 @@
 
         try {
             $request['context']['localPath'] = $tempFilePath;
-            //$marshaller->marshallRequest($request);
 
             try {
                 if ($request['actionName'] == "uploadArchive") {
-                    $remotePath = $request['context']['remotePath'];////
+                    $remotePath = $request['context']['remotePath'];
 
                     $ext = pathinfo($remotePath, PATHINFO_EXTENSION);
                     $newFilePath = monstaReplaceExtension($tempFilePath, $ext);
@@ -90,14 +90,15 @@
                     print json_encode($response);
                 } else {
                     print $marshaller->marshallRequest($request);
-                    //cleanupTempTransferPath($newFilePath);
                 }
             } catch (Exception $e) {
                 cleanupTempTransferPath($tempFilePath);
                 throw $e;
             }
         } catch (Exception $e) {
-            unlink($tempFilePath);
+            if(file_exists($tempFilePath)){
+                unlink($tempFilePath);
+            }
             unset($_SESSION[$sessionKey]);
             throw $e;
         }

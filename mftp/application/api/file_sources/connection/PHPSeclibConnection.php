@@ -71,8 +71,11 @@
                 mftpLog(LOG_WARNING, "SFTPSecLib failed to put '{$transferOperation->getRemotePath()}' to '{$transferOperation->getLocalPath()}': {$this->lastError['message']}");
             }
 
-            if ($transferSuccess && !is_null($transferOperation->getCreateMode()))
-                $this->changePermissions($transferOperation->getCreateMode(), $transferOperation->getRemotePath());
+            if (method_exists($transferOperation, 'getCreateMode')) {
+                if ( $transferSuccess && !is_null($transferOperation->getCreateMode()) ) {
+                    $this->changePermissions($transferOperation->getCreateMode(), $transferOperation->getRemotePath());
+                }
+            }
 
             return $transferSuccess;
         }

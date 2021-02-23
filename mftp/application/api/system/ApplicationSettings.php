@@ -206,9 +206,11 @@
         }
 
         public function save() {
-            if (!$this->settingsWritable())
-                throw new LocalizableException("Could not write settings JSON at " . $this->settingsPath,
-                    LocalizableExceptionDefinition::$SETTINGS_WRITE_ERROR, array("path" => $this->settingsPath));
+            if (!$this->settingsWritable()) {
+                $errorPath = basename(dirname($this->$settingsPath)) . "/" . basename($this->$settingsPath);
+                throw new LocalizableException("Could not write settings JSON at " . $errorPath,
+                    LocalizableExceptionDefinition::$SETTINGS_WRITE_ERROR, array("path" => $errorPath));
+            }
 
             file_put_contents($this->settingsPath, json_format($this->settings));
         }

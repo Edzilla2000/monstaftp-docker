@@ -52,8 +52,9 @@
             try {
                 $rawLicenseData = $this->keyPairSuite->base64DecodeAndDecrypt($encodedData);
             } catch (KeyPairException $e) {
-                throw new InvalidLicenseException("Unable to read the license file at '$licensePath'.",
-                    LocalizableExceptionDefinition::$LICENSE_READ_FAILED_ERROR, array('path' => $licensePath));
+                $errorPath = basename(dirname($licensePath)) . "/" . basename($licensePath);
+                throw new InvalidLicenseException("Unable to read the license file at '$errorPath'.",
+                    LocalizableExceptionDefinition::$LICENSE_READ_FAILED_ERROR, array('path' => $errorPath));
             }
 
             return json_decode($rawLicenseData, true);

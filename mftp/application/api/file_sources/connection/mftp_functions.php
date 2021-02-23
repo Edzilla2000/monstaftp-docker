@@ -186,7 +186,7 @@
         /**
          * @var int
          */
-        public $timeout = 90;
+        public $timeout = 300;
 
         /**
          * @var null|int

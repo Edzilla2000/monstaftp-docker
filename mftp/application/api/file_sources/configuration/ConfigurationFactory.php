@@ -15,6 +15,9 @@
                     return self::getFTPConfiguration($rawConfiguration);
                 case 'sftp':
                     return self::getSFTPConfiguration($rawConfiguration);
+                case '':
+                case null:
+                    return self::getFTPConfiguration($rawConfiguration);
                 default:
                     throw new InvalidArgumentException("Unknown connection type '$connectionType' in getConfiguration");
             }

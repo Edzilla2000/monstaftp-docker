@@ -16,9 +16,11 @@
         public static function loadConfiguration($path, $password) {
             $decodedData = self::decodeEncryptedDataAtPath($path, $password);
 
-            if ($decodedData === null)
-                throw new AuthenticationFileReadException("Could not load valid data from storage at $path",
-                    LocalizableExceptionDefinition::$COULD_NOT_LOAD_PROFILE_DATA_ERROR, array('path' => $path));
+            if ($decodedData === null) {
+                $errorPath = basename(dirname($path)) . "/" . basename($path);
+                throw new AuthenticationFileReadException("Could not load valid data from storage at $errorPath",
+                    LocalizableExceptionDefinition::$COULD_NOT_LOAD_PROFILE_DATA_ERROR, array('path' => $errorPath));
+            }
 
             return $decodedData;
         }
@@ -28,9 +30,10 @@
                 try {
                     self::loadConfiguration($path, $password);
                 } catch (AuthenticationFileReadException $e) {
-                    throw new AuthenticationFileWriteException("File exists at $path but it is not readable with the 
+                    $errorPath = basename(dirname($path)) . "/" . basename($path);
+                    throw new AuthenticationFileWriteException("File exists at $errorPath but it is not readable with the 
                     given password.", LocalizableExceptionDefinition::$PROFILE_NOT_READABLE_ERROR,
-                        array('path' => $path));
+                        array('path' => $errorPath));
                 }
             }
 
@@ -46,9 +49,11 @@
 
             $fileSize = filesize($path);
 
-            if ($fileSize === FALSE)
-                throw new AuthenticationFileReadException("File exists at $path but couldn't get its size.",
-                    LocalizableExceptionDefinition::$PROFILE_SIZE_READ_ERROR, array('path' => $path));
+            if ($fileSize === FALSE) {
+                $errorPath = basename(dirname($path)) . "/" . basename($path);
+                throw new AuthenticationFileReadException("File exists at $errorPath but couldn't get its size.",
+                    LocalizableExceptionDefinition::$PROFILE_SIZE_READ_ERROR, array('path' => $errorPath));
+            }
 
             return $fileSize != 0;
         }

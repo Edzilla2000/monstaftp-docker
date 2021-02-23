@@ -104,18 +104,23 @@
             $licensePath = PathOperations::join($this->getOutputDirectory(),
                 $configBuilder->generateRelativeLicensePath());
 
-            if (@file_put_contents($licensePath, $licenseContent) === false)
-                throw new LocalizableException("Could not write license file to $licensePath",
-                    LocalizableExceptionDefinition::$LICENSE_WRITE_ERROR, array("path" => $licensePath));
+            if (@file_put_contents($licensePath, $licenseContent) === false) {
+                $errorPath = basename(dirname($licensePath)) . "/" . basename($licensePath);
+                throw new LocalizableException("Could not write license file to $errorPath",
+                    LocalizableExceptionDefinition::$LICENSE_WRITE_ERROR, array("path" => $errorPath));
+            }
         }
 
         public function writeConfig($configContent) {
             $this->checkOutputDirectoryWritable();
 
-            if (@file_put_contents($this->getConfigOutputPath(), $configContent) === false)
-                throw new LocalizableException("Could not write pro config to " . normalizePath($this->getConfigOutputPath()),
+            if (@file_put_contents($this->getConfigOutputPath(), $configContent) === false) {
+                $path = normalizePath($this->getConfigOutputPath());
+                $errorPath = basename(dirname($path)) . "/" . basename($path);
+                throw new LocalizableException("Could not write pro config to " . $errorPath,
                     LocalizableExceptionDefinition::$LICENSE_WRITE_ERROR,
-                    array("path" => normalizePath($this->getConfigOutputPath())));
+                    array("path" => $errorPath));
+            }
         }
 
         public function renderConfig($configTemplatePath, $proPackageID) {
@@ -134,9 +139,11 @@
 
         private function checkOutputDirectoryWritable() {
             if (!@is_writable($this->getOutputDirectory())) {
-                throw new LocalizableException("License directory " . normalizePath($this->getOutputDirectory()) . " not writable, check its permissions.",
+                $path = normalizePath($this->getOutputDirectory());
+                $errorPath = basename(dirname($path)) . "/" . basename($path);
+                throw new LocalizableException("License directory " . $errorPath . " not writable, check its permissions.",
                     LocalizableExceptionDefinition::$LICENSE_DIRECTORY_NOT_WRITABLE_ERROR,
-                    array("path" => normalizePath($this->getOutputDirectory())));
+                    array("path" => $errorPath));
             }
         }
     }

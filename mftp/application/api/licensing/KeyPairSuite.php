@@ -65,13 +65,14 @@
             return $this->rawDecrypt(base64_decode($encoded));
         }
 
-        private function throwKeyLoadException($path, $publicOrPrivate, $errorCode, $originalExceptionMessage = null){
-            $exceptionMessage = "Unable to load $publicOrPrivate key at path '$path'.";
+        private function throwKeyLoadException($path, $publicOrPrivate, $errorCode, $originalExceptionMessage = null) {
+            $errorPath = basename(dirname($path)) . "/" . basename($path);
+            $exceptionMessage = "Unable to load $publicOrPrivate key at path '$errorPath'.";
 
             if(!is_null($originalExceptionMessage)) {
                 $exceptionMessage .= "  Original exception was: '$originalExceptionMessage'";
             }
 
-            throw new KeyPairException($exceptionMessage, $errorCode, array("path" => $this->$path));
+            throw new KeyPairException($exceptionMessage, $errorCode, array("path" => $this->$errorPath));
         }
     }

@@ -19,7 +19,7 @@
 
     try {
         $request = json_decode($_POST['request'], true);
-
+        
         if ($request['actionName'] == 'fetchFile' || $request['actionName'] == 'downloadMultipleFiles') {
             switch ($request['actionName']) {
                 case 'fetchFile':

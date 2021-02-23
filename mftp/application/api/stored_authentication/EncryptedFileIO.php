@@ -16,14 +16,15 @@
             if(@file_put_contents($path, $encryptedPayload) === false){
                 $pathDirectory = dirname($path);
 
+                $errorPath = basename($pathDirectory) . "/" . basename($path);
                 if(!file_exists($path) && !is_writable($pathDirectory)) {
-                    throw new LocalizableException("Could write to data file in $pathDirectory as it does not appear to 
+                    throw new LocalizableException("Could write to data file in directory $errorPath as it does not appear to 
                     be writable.", LocalizableExceptionDefinition::$FILE_NOT_WRITABLE_ERROR,
-                        array("path" => $pathDirectory));
+                        array("path" => $errorPath));
                 }
 
-                throw new LocalizableException("Could write to data file $path as it does not appear to be 
-                        writable.", LocalizableExceptionDefinition::$FILE_NOT_WRITABLE_ERROR, array("path" => $path));
+                throw new LocalizableException("Could write to data file $errorPath as it does not appear to be 
+                        writable.", LocalizableExceptionDefinition::$FILE_NOT_WRITABLE_ERROR, array("path" => $errorPath));
             }
         }
 

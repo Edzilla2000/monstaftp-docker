@@ -44,8 +44,9 @@
             if (!is_null($archiveHandle))
                 $archiveHandle->close();
 
-            throw new LocalizableException("$archivePath is unreadable or not a Monsta FTP install archive.",
-                LocalizableExceptionDefinition::$INSTALL_PATH_NOT_WRITABLE_ERROR, array("path" => $archivePath));
+            $errorPath = basename(dirname($archivePath)) . "/" . basename($archivePath);
+            throw new LocalizableException("$errorPath is unreadable or not a Monsta FTP install archive.",
+                LocalizableExceptionDefinition::$INSTALL_PATH_NOT_WRITABLE_ERROR, array("path" => $errorPath));
         }
 
         private function testArchiveForDefaultManifest($archivePath, $archiveHandle) {

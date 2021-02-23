@@ -9,6 +9,7 @@ class ComposerStaticInit8357991fef199ec251d2d4eb2b427244
     public static $files = array (
         'fd419dbaef6da3b0a9513930c6ff3624' => __DIR__ . '/..' . '/wapmorgan/unified-archive/src/function.gzip_stat.php',
         '9e1b3d8b1d64afff01a1869b5f98e4e3' => __DIR__ . '/..' . '/wapmorgan/unified-archive/src/REGISTER_LZW_STREAM_WRAPPER.php',
+        '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
     );
 
     public static $prefixLengthsPsr4 = array (
