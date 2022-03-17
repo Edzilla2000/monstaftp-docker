@@ -18,6 +18,7 @@ RUN sed -i "s/error_reporting = .*$/error_reporting = E_ERROR | E_WARNING | E_PA
 RUN sed -i "s/memory_limit = .*$/memory_limit = 1024M/" /etc/php/7.4/apache2/php.ini
 RUN sed -i "s/post_max_size = .*$/post_max_size = 2048M/" /etc/php/7.4/apache2/php.ini
 RUN sed -i "s/upload_max_filesize = .*$/upload_max_filesize = 2048M/" /etc/php/7.4/apache2/php.ini
+RUN sed -i "s/max_execution_time = .*$/max_execution_time = 1800/" /etc/php/7.4/apache2/php.ini
 
 
 ENV APACHE_RUN_USER www-data
